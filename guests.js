@@ -252,10 +252,10 @@ Bishop Drummer,26
 Toyenyen,26
 Dr Emma Udebunu,27
 Mrs Oluchi Udebunu,27
-Pst Osas Micheals,27
-Pst. Dr Micheals,27
-Mr Daniel Obiokolo,27
-Mrs Blessing Obiokolo,27
+Ps Osas Michaels,27
+Dr Michaels Aibangbee,27
+Mr Daniel Obiokoli,27
+Mrs Blessing Obiokoli,27
 Mr Pius Nwosu,27
 Mrs Stalla Nwosu,27
 Mrs Osita Michael Ifechigha,27
