@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C1211">
+<meta name="robots" content="noindex, nofollow">
+<title>Find your seat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="guests.js"></script>
+<style>
+:root {
+  --bg: #0C1211;
+  --ink: #F2F4EC;
+  --soft: #C9D2CE;
+  --muted: #A9B6B1;
+  --faint: #9DAAA5;
+  --deep: #1F3530;
+  --accent: #C2DE7E;
+  --accent-rgb: 194, 222, 126;
+  --accent2-rgb: 127, 163, 160;
+  --accent-light: #D6E8A6;
+  --accent-dark: #8CA05B;
+  --accent-deep: #61703F;
+  --pw: 390px;
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: #070B0A; color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.app { position: relative; max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; background: var(--bg); overflow: hidden; }
+
+/* Celebrant photo */
+.photo-wrap { position: absolute; top: 0; left: 50%; width: var(--pw); height: calc(var(--pw) * 1.5013); transform: translateX(-50%); transition: width 450ms ease, height 450ms ease; pointer-events: none; }
+.photo { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; filter: saturate(1.06) contrast(1.02); }
+.scrim { position: absolute; inset: -1px; background:
+  linear-gradient(180deg, rgba(12,18,17,.32) 0%, rgba(12,18,17,0) 6%, rgba(12,18,17,0) 38%, rgba(12,18,17,.45) 47%, rgba(12,18,17,.82) 60%, rgba(12,18,17,.95) 74%, #0C1211 94%),
+  linear-gradient(90deg, #0C1211 0%, rgba(12,18,17,0) 11%, rgba(12,18,17,0) 89%, #0C1211 100%); }
+.spark { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; opacity: .15; animation: twinkle 2.6s ease-in-out infinite; }
+.spark::before { content: ""; position: absolute; inset: -2px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--accent-rgb), .55) 0%, rgba(var(--accent-rgb), 0) 70%); }
+.spark svg { position: relative; display: block; width: 100%; height: 100%; }
+@keyframes twinkle { 0%, 100% { opacity: .12; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.05); } }
+
+/* Screens */
+.screen { display: none; position: relative; z-index: 2; min-height: 100vh; min-height: 100dvh; flex-direction: column; padding: calc(var(--pw) * 0.76) 24px calc(28px + env(safe-area-inset-bottom)); }
+.app[data-screen="loading"] #s-loading,
+.app[data-screen="error"] #s-error,
+.app[data-screen="welcome"] #s-welcome,
+.app[data-screen="search"] #s-search,
+.app[data-screen="found"] #s-found,
+.app[data-screen="choose"] #s-choose,
+.app[data-screen="notfound"] #s-notfound { display: flex; animation: fadein 380ms ease both; }
+@keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.spacer { flex: 1 1 16px; }
+.topbar { position: absolute; top: calc(18px + env(safe-area-inset-top)); left: 20px; right: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.back { width: 44px; height: 44px; flex: none; border-radius: 22px; border: 1px solid rgba(255,255,255,.16); background: rgba(12,18,17,.5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.pill { font-size: 12px; font-weight: 500; color: #DCE3DE; padding: 7px 12px; border-radius: 999px; background: rgba(12,18,17,.5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.pill-title { font-family: var(--serif); font-style: italic; font-size: 24px; line-height: 1.1; font-weight: 700; color: var(--accent); padding: 8px 20px; border-radius: 999px; background: rgba(12,18,17,.72); border: 1px solid rgba(var(--accent-rgb), .55); box-shadow: 0 0 24px rgba(var(--accent-rgb), .35), inset 0 1px 0 rgba(255,255,255,.12); text-shadow: 0 0 16px rgba(var(--accent-rgb), .4); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.ghost-slot { width: 44px; flex: none; }
+.eyebrow { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #DCE3DE; text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), .9); }
+h1, h2 { font-family: var(--serif); font-variant-numeric: lining-nums; font-weight: 600; margin: 0; text-shadow: 0 2px 20px rgba(0,0,0,.55); }
+#checkin-area { display: flex; flex-direction: column; align-items: center; }
+h1 { font-size: 40px; line-height: 1.02; margin-top: 10px; }
+h2 { font-size: 40px; line-height: 1.02; }
+.celebrating { margin: 8px 0 0; font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 600; color: var(--accent); text-shadow: 0 0 16px rgba(var(--accent-rgb), .4), 0 1px 10px rgba(0,0,0,.6); }
+.lead { margin: 8px 0 0; font-size: 15px; line-height: 1.45; color: var(--soft); }
+.card { margin-top: 18px; border-radius: 22px; background: rgba(20,30,28,.58); border: 1px solid rgba(255,255,255,.1); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); }
+.row { display: flex; align-items: center; gap: 14px; padding: 12px 18px; }
+.row + .row { border-top: 1px solid rgba(255,255,255,.07); }
+.row svg { flex: none; color: var(--accent); }
+.row b { display: block; font-size: 15px; font-weight: 600; }
+.row span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.hint { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; margin: 8px 0 56px; }
+.hint b { font-size: 16px; font-weight: 700; color: var(--ink); }
+.hint span { font-size: 14px; color: var(--soft); }
+.caption { margin: 8px 0 0; text-align: center; font-size: 13px; color: var(--faint); }
+
+/* Round 3D glowing button */
+.orb-wrap { position: relative; width: 132px; height: 132px; display: grid; place-items: center; align-self: center; flex: none; }
+.orb-wrap::before { content: ""; position: absolute; inset: -42px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--accent-rgb), .75) 0%, rgba(var(--accent-rgb), .2) 45%, rgba(var(--accent-rgb), 0) 70%); animation: breathe 2.6s ease-in-out infinite; pointer-events: none; }
+.ring { position: absolute; width: 118px; height: 118px; border-radius: 50%; border: 2px solid rgba(var(--accent-rgb), .9); animation: ripple 2.6s ease-out infinite; pointer-events: none; }
+.ring.r2 { border-color: rgba(241,238,218,.7); border-width: 1.5px; animation-delay: 1.3s; }
+@keyframes ripple { from { transform: scale(1); opacity: .9; } to { transform: scale(1.7); opacity: 0; } }
+@keyframes breathe { 0%, 100% { transform: scale(.84); opacity: .6; } 50% { transform: scale(1.04); opacity: 1; } }
+.orb { position: relative; width: 118px; height: 118px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; color: var(--deep);
+  background: radial-gradient(circle at 34% 26%, #FBFDF0 0%, var(--accent-light) 18%, var(--accent) 46%, var(--accent-dark) 100%);
+  box-shadow: inset 0 -8px 16px rgba(40,52,24,.5), inset 0 5px 10px rgba(255,255,255,.65), 0 8px 0 var(--accent-deep), 0 16px 30px rgba(0,0,0,.55), 0 0 50px rgba(var(--accent-rgb), .5), 0 0 100px rgba(var(--accent2-rgb), .3);
+  transition: transform 90ms ease, box-shadow 90ms ease; }
+.orb::after { content: ""; position: absolute; top: 10%; left: 18%; width: 48%; height: 32%; border-radius: 50%; background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 70%); pointer-events: none; }
+.orb:active { transform: translateY(6px); box-shadow: inset 0 -8px 16px rgba(40,52,24,.5), inset 0 5px 10px rgba(255,255,255,.65), 0 2px 0 var(--accent-deep), 0 6px 16px rgba(0,0,0,.55), 0 0 60px rgba(var(--accent-rgb), .6); }
+.orb svg { position: relative; }
+
+/* Digit boxes and keypad */
+.boxes { display: flex; justify-content: center; gap: 10px; margin-top: 22px; }
+.box { width: 54px; height: 62px; border-radius: 16px; display: grid; place-items: center; font-size: 28px; font-weight: 600; background: rgba(20,30,28,.55); border: 1.5px solid rgba(255,255,255,.16); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transition: all 160ms ease; }
+.box.filled { background: rgba(20,30,28,.78); border-color: rgba(var(--accent-rgb), .5); box-shadow: 0 0 12px rgba(var(--accent2-rgb), .3); }
+.box.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .15), 0 0 22px rgba(var(--accent-rgb), .45); }
+.example { margin: 12px 0 0; text-align: center; font-size: 13px; color: var(--faint); }
+.keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.key { height: 60px; border-radius: 20px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.06); color: var(--ink); font-size: 27px; font-weight: 500; cursor: pointer; transition: background 120ms ease, transform 80ms ease; }
+.key:active { background: rgba(var(--accent-rgb), .22); transform: scale(.96); }
+.key.plain { background: transparent; border: 0; color: var(--soft); display: grid; place-items: center; }
+
+/* Name search */
+.field { position: relative; margin-top: 16px; }
+.field input { width: 100%; height: 60px; padding: 0 54px 0 50px; border-radius: 20px; border: 1.5px solid rgba(var(--accent-rgb), .6); background: rgba(20,30,28,.74); color: var(--ink); font: 600 20px var(--sans); outline: none; -webkit-appearance: none; appearance: none; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .12), 0 0 22px rgba(var(--accent-rgb), .3); transition: box-shadow 160ms ease, border-color 160ms ease; }
+.field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .2), 0 0 32px rgba(var(--accent-rgb), .55); }
+.field input::placeholder { color: var(--faint); font-weight: 500; }
+.field input::-webkit-search-cancel-button { display: none; }
+.field .lens { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); pointer-events: none; }
+.field .clear { position: absolute; right: 8px; top: 8px; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; color: var(--soft); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.results { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.match.compact { min-height: 58px; margin-top: 0; border-radius: 18px; padding: 0 14px; gap: 12px; }
+.match.compact .avatar { width: 38px; height: 38px; font-size: 13px; }
+.match.compact b { font-size: 16px; }
+.match .txt { flex: 1; min-width: 0; }
+.match .txt b, .match .txt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note { margin: 12px 0 0; font-size: 14px; line-height: 1.45; color: var(--soft); text-align: center; }
+
+/* Found screen */
+.center { text-align: center; }
+.eyebrow-accent { margin: 0; text-align: center; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--accent); text-shadow: 0 0 14px rgba(var(--accent-rgb), .45), 0 1px 10px rgba(0,0,0,.6); }
+.reveal { margin-top: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.die-label { position: relative; z-index: 1; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: #DCE3DE; text-shadow: 0 1px 8px rgba(0,0,0,.7); }
+.die-stage { position: relative; width: 170px; height: 136px; display: grid; place-items: center; }
+.die-stage::before { content: ""; position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--accent-rgb), .75) 0%, rgba(var(--accent-rgb), .2) 45%, rgba(var(--accent-rgb), 0) 70%); animation: breathe 2.6s ease-in-out infinite; pointer-events: none; }
+.die-stage .ring { width: 132px; height: 132px; left: 50%; top: 50%; margin: -66px 0 0 -66px; }
+.die { position: relative; width: 116px; height: 116px; border-radius: 28px; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(150deg, #F0F6DF 0%, var(--accent-light) 30%, var(--accent) 58%, var(--accent-dark) 100%);
+  box-shadow: inset 0 -9px 16px rgba(40,52,24,.55), inset 0 6px 10px rgba(255,255,255,.7), 0 9px 0 var(--accent-deep), 0 18px 34px rgba(0,0,0,.55), 0 0 60px rgba(var(--accent-rgb), .55), 0 0 110px rgba(var(--accent2-rgb), .3);
+  will-change: transform; }
+.die.settle { transition: transform 420ms cubic-bezier(.2, 1.7, .4, 1); }
+.die::after { content: ""; position: absolute; top: 7%; left: 12%; width: 56%; height: 30%; border-radius: 50%; background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.8) 0%, rgba(255,255,255,0) 70%); pointer-events: none; }
+.pips { position: relative; width: 76px; height: 76px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); place-items: center; }
+.pip { width: 17px; height: 17px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #3E5E58 0%, #1F3530 70%); box-shadow: inset 0 2px 3px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.5); opacity: 0; }
+.pip.on { opacity: 1; }
+.num { position: relative; font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 80px; line-height: 1; font-weight: 700; color: var(--deep); text-shadow: 0 1px 0 rgba(255,255,255,.55), 0 0 18px rgba(255,255,255,.35); }
+.chip { font-size: 14px; font-weight: 600; color: #DCE3DE; padding: 7px 14px; border-radius: 999px; background: rgba(20,30,28,.6); border: 1px solid rgba(255,255,255,.1); }
+.map { margin-top: 14px; border-radius: 18px; padding: 10px 12px; background: rgba(20,30,28,.55); border: 1px solid rgba(255,255,255,.07); }
+.map-head { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.map-head b { font-weight: 600; color: var(--soft); }
+.map-head span { color: var(--muted); }
+.tables { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 8px; }
+.tables.floor { display: grid; gap: 5px 2px; justify-items: center; align-items: center; }
+.floor .lbl { width: 100%; padding: 5px 0; border-radius: 7px; background: rgba(255,255,255,.07); font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-align: center; color: var(--muted); }
+.t { width: min(22px, 100%); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 600; color: var(--muted); background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); transition: all 300ms ease; }
+.t.on { background: var(--accent); color: #13200E; border-color: transparent; box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .18), 0 0 20px rgba(var(--accent-rgb), .75); }
+.checked { border-radius: 26px; border: 1px solid rgba(var(--accent-rgb), .55); background: rgba(20,30,28,.65); box-shadow: 0 0 40px rgba(var(--accent-rgb), .22); padding: 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; animation: fadein 380ms ease both; }
+.checked div { display: flex; align-items: center; gap: 12px; color: var(--accent); }
+.checked strong { font-family: var(--serif); font-size: 42px; line-height: 1; font-weight: 700; text-shadow: 0 0 16px rgba(var(--accent-rgb), .45); }
+.checked span { font-size: 16px; font-weight: 500; color: #DCE3DE; }
+
+/* Choose screen */
+.match { width: 100%; min-height: 76px; border-radius: 22px; border: 1px solid rgba(255,255,255,.1); background: rgba(20,30,28,.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: var(--ink); display: flex; align-items: center; gap: 14px; padding: 0 18px; cursor: pointer; text-align: left; margin-top: 12px; }
+.avatar { width: 44px; height: 44px; flex: none; border-radius: 22px; display: grid; place-items: center; font-size: 15px; font-weight: 600; color: #13200E; background: var(--accent); }
+.match b { display: block; font-size: 17px; font-weight: 600; }
+.match small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* Not found and loading */
+.icon-circle { width: 76px; height: 76px; border-radius: 38px; align-self: center; background: rgba(20,30,28,.6); border: 1px solid rgba(255,255,255,.14); display: grid; place-items: center; color: #DCE3DE; }
+.link-btn { align-self: center; margin-top: 2px; height: 44px; padding: 0 16px; border: 0; border-radius: 16px; background: transparent; color: var(--soft); font-size: 15px; font-weight: 500; cursor: pointer; }
+.loader { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(var(--accent-rgb), .25); border-top-color: var(--accent); animation: spin 900ms linear infinite; align-self: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.credit { position: absolute; left: 0; right: 0; bottom: calc(7px + env(safe-area-inset-bottom)); z-index: 3; margin: 0; padding: 0 12px; text-align: center; font-size: 11px; line-height: 1.3; color: var(--faint); }
+.credit a { color: var(--soft); text-decoration: underline; text-underline-offset: 2px; }
+.credit a:hover { color: var(--accent); }
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-height: 700px) {
+  #s-found .orb-wrap { width: 104px; height: 104px; margin-bottom: 6px; }
+  #s-found .orb, #s-found .orb-wrap .ring { width: 94px; height: 94px; }
+  #s-found .die-stage { height: 120px; }
+  #s-found .map { margin-top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spark, .ring, .orb-wrap::before, .die-stage::before { animation: none; }
+  .spark { opacity: .7; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app" data-screen="loading">
+
+  <div class="photo-wrap" aria-hidden="true">
+    <img class="photo" id="photo" alt="">
+    <div class="scrim"></div>
+    <div id="sparks"></div>
+  </div>
+
+  <section class="screen" id="s-loading" aria-live="polite">
+    <div class="spacer"></div>
+    <div class="loader"></div>
+    <p class="caption">Loading the guest list…</p>
+    <div class="spacer"></div>
+  </section>
+
+  <section class="screen" id="s-error" aria-live="polite">
+    <h2 class="center">We can't load the guest list</h2>
+    <p class="lead center">Please check your connection and try again, or see an usher at the entrance.</p>
+    <div class="spacer"></div>
+    <div class="orb-wrap"><span class="ring"></span><button class="orb" type="button" aria-label="Try again" onclick="location.reload()"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg></button></div>
+  </section>
+
+  <!-- Welcome -->
+  <section class="screen" id="s-welcome">
+    <p class="eyebrow"><span class="dot"></span>You're welcome</p>
+    <h1 data-bind="occasion"></h1>
+    <p class="celebrating">Celebrating <span data-bind="celebrant"></span></p>
+    <div class="card">
+      <div class="row">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
+        <div><b data-bind="date"></b><span data-bind="time"></span></div>
+      </div>
+      <div class="row">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <div><b data-bind="venue"></b><span data-bind="address"></span></div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="hint"><b>Tap to find your seat.</b><span id="hint-sub">Have your mobile number handy.</span></div>
+    <div class="orb-wrap">
+      <span class="ring"></span><span class="ring r2"></span>
+      <button class="orb" type="button" id="btn-start" aria-label="Find my seat">
+        <svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <section class="screen" id="s-search">
+    <div class="topbar">
+      <button class="back" type="button" data-go="welcome" aria-label="Back"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="pill-title" data-bind="shortTitle"></span>
+      <span class="ghost-slot"></span>
+    </div>
+    <h2>Find your seat</h2>
+    <div id="by-name" hidden>
+      <p class="lead"><label for="name-input">Type the first few letters of your name.</label></p>
+      <div class="field">
+        <svg class="lens" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input id="name-input" type="text" inputmode="text" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" placeholder="First name or surname" aria-controls="results">
+        <button class="clear" type="button" id="name-clear" aria-label="Clear" hidden><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="results" id="results" aria-live="polite"></div>
+      <p class="note" id="name-note"></p>
+    </div>
+    <div id="by-mobile" hidden>
+      <p class="lead">Enter the last 5 digits of your mobile number.</p>
+      <div class="boxes" id="boxes" role="group" aria-label="Last five digits"></div>
+      <p class="sr-only" id="digits-live" aria-live="polite"></p>
+      <p class="example">For 0412 345 678, enter 45678</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="keypad" id="keypad" hidden></div>
+  </section>
+
+  <!-- Found -->
+  <section class="screen" id="s-found">
+    <div class="topbar">
+      <button class="back" type="button" data-go="search" aria-label="Back to search"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="pill" id="found-pill"></span>
+      <span class="ghost-slot"></span>
+    </div>
+    <p class="eyebrow-accent">Welcome</p>
+    <h2 class="center" id="guest-name"></h2>
+    <div class="reveal">
+      <span class="die-label" id="die-label" aria-live="polite">Your table</span>
+      <div class="die-stage">
+        <span class="ring"></span><span class="ring r2"></span>
+        <button class="die" type="button" id="die" aria-label="Your table">
+          <span class="pips" id="pips" aria-hidden="true"></span>
+          <span class="num" id="die-num" hidden></span>
+        </button>
+      </div>
+      <span class="chip" id="seat-chip" hidden></span>
+      <span class="chip" id="partner-chip" hidden></span>
+    </div>
+    <div class="map">
+      <div class="map-head"><b>Floor plan · stage at the front</b><span id="map-hint"></span></div>
+      <div class="tables" id="tables"></div>
+    </div>
+    <div class="spacer"></div>
+    <div id="checkin-area">
+      <div class="orb-wrap">
+        <span class="ring"></span><span class="ring r2"></span>
+        <button class="orb" type="button" id="btn-checkin" aria-label="I've arrived, check me in">
+          <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </button>
+      </div>
+      <p class="caption">Tap when you've arrived</p>
+    </div>
+    <div class="checked" id="checked" hidden>
+      <div><svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><strong>Checked in</strong></div>
+      <span>Enjoy the celebration</span>
+    </div>
+  </section>
+
+  <!-- Choose -->
+  <section class="screen" id="s-choose">
+    <div class="topbar">
+      <button class="back" type="button" data-go="search" aria-label="Back to search"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="ghost-slot"></span>
+    </div>
+    <h2>Which one is you?</h2>
+    <p class="lead" id="choose-lead"></p>
+    <div id="matches" style="margin-top: 12px"></div>
+    <div class="spacer"></div>
+    <p class="caption">Not on the list? An usher at the entrance can help.</p>
+  </section>
+
+  <!-- Not found -->
+  <section class="screen" id="s-notfound">
+    <div class="icon-circle"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M8.5 11h5"/></svg></div>
+    <h2 class="center" style="margin-top: 20px" id="nomatch-title"></h2>
+    <p class="lead center">Check the digits and try again. If someone else RSVP'd for you, try their mobile, or see an usher at the entrance.</p>
+    <div class="spacer"></div>
+    <div class="orb-wrap">
+      <span class="ring"></span>
+      <button class="orb" type="button" data-go="search" aria-label="Try again"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg></button>
+    </div>
+    <p class="caption">Tap to try again</p>
+    <button class="link-btn" type="button" data-go="welcome">Back to start</button>
+  </section>
+  <p class="credit" id="credit" hidden><span id="credit-text"></span><span id="credit-sep"> · </span><a id="credit-mail"></a></p>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.SEAT_FINDER_CONFIG || {};
+  var app = document.getElementById('app');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var guests = [];
+  var state = { screen: 'loading', digits: '', matches: [], guest: null, rolling: false, typing: false };
+  var byName = String(C.searchBy || 'name').toLowerCase() !== 'mobile';
+  var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+
+  /* ---------- colours from config ---------- */
+  function hexToRgb(hex) {
+    var h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(h, 16);
+    if (isNaN(n) || h.length !== 6) return null;
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function mix(rgb, f) {
+    return 'rgb(' + rgb.map(function (v) { return Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f); }).join(',') + ')';
+  }
+  (function applyColours() {
+    var a = hexToRgb(C.accent), b = hexToRgb(C.accent2), s = document.documentElement.style;
+    if (a) {
+      s.setProperty('--accent', C.accent);
+      s.setProperty('--accent-rgb', a.join(','));
+      s.setProperty('--accent-light', mix(a, 0.35));
+      s.setProperty('--accent-dark', mix(a, -0.28));
+      s.setProperty('--accent-deep', mix(a, -0.5));
+    }
+    if (b) s.setProperty('--accent2-rgb', b.join(','));
+  })();
+
+  /* ---------- text from config ---------- */
+  var defaults = { occasion: '', celebrant: '', shortTitle: '', date: '', time: '', venue: '', address: '' };
+  Object.keys(defaults).forEach(function (k) {
+    document.querySelectorAll('[data-bind="' + k + '"]').forEach(function (el) { el.textContent = C[k] || ''; });
+  });
+  document.title = (C.shortTitle ? C.shortTitle + ' · ' : '') + 'Find your seat';
+  (function credit() {
+    var text = String(C.credit || '').trim(), mail = String(C.creditEmail || '').trim();
+    if (!text && !mail) return;
+    document.getElementById('credit-text').textContent = text;
+    var a = document.getElementById('credit-mail');
+    if (mail) { a.textContent = mail; a.href = 'mailto:' + mail; } else a.hidden = true;
+    document.getElementById('credit-sep').hidden = !(text && mail);
+    document.getElementById('credit').hidden = false;
+  })();
+  var photo = document.getElementById('photo');
+  photo.src = C.photo || 'assets/celebrant.jpg';
+
+  /* ---------- sparkles ---------- */
+  var sparkSpots = [[12, 16, .9], [85, 11, 1.2], [91, 33, .6], [6, 40, .7], [53, 4, .55], [77, 51, .8], [20, 26, .45], [77, 20, .5], [93, 80, .7], [5, 95, .5], [95, 118, .45]];
+  var star = '<svg viewBox="-11 -11 22 22"><path d="M0 -10 C1 -2 2 -1 10 0 C2 1 1 2 0 10 C-1 2 -2 1 -10 0 C-2 -1 -1 -2 0 -10Z" fill="#FFF8DE"/></svg>';
+  var sparks = document.getElementById('sparks');
+  sparkSpots.forEach(function (p, i) {
+    var el = document.createElement('span');
+    el.className = 'spark';
+    el.style.left = p[0] + '%';
+    el.style.top = (p[1] / 150 * 100) + '%';
+    el.style.width = el.style.height = Math.round(22 * p[2]) + 'px';
+    el.style.animationDelay = (i * 0.37 % 2.6).toFixed(2) + 's';
+    el.style.animationDuration = (2 + (i % 4) * 0.45).toFixed(2) + 's';
+    el.innerHTML = star;
+    sparks.appendChild(el);
+  });
+
+  /* ---------- layout: keep her face clear on any screen height ---------- */
+  var reserve = { loading: 300, error: 360, welcome: 520, search: 500, found: 570, choose: 380, notfound: 440 };
+  function layout() {
+    var W = Math.min(window.innerWidth, 480);
+    var H = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    var need = reserve[state.screen] || 480;
+    if (state.screen === 'search' && byName) {
+      need = 330;
+      // Leave room for the phone's keyboard while the guest is typing
+      if (state.typing && coarse) H = Math.min(H, window.innerHeight * 0.6);
+    }
+    var extra = (state.screen === 'found' && (C.showSeat || C.showPlusOne)) ? 80 : 0;
+    var pw = Math.max(190, Math.min(W, (H - need - extra) / 0.78));
+    document.documentElement.style.setProperty('--pw', Math.round(pw) + 'px');
+  }
+  window.addEventListener('resize', layout);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', layout);
+
+  function go(screen) {
+    state.screen = screen;
+    app.setAttribute('data-screen', screen);
+    layout();
+    window.scrollTo(0, 0);
+    if (screen === 'search') {
+      state.digits = ''; renderBoxes();
+      if (byName) { nameInput.value = ''; renderResults(); nameInput.focus(); }
+    }
+    if (screen === 'welcome' || screen === 'search') stopRoll();
+  }
+  document.querySelectorAll('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () { go(b.getAttribute('data-go')); });
+  });
+  document.getElementById('btn-start').addEventListener('click', function () { go('search'); });
+
+  /* ---------- guest list ---------- */
+  function parseCsv(text) {
+    var rows = [], row = [], cell = '', q = false, t = String(text || '').replace(/\r\n?/g, '\n');
+    for (var i = 0; i < t.length; i++) {
+      var c = t[i];
+      if (q) {
+        if (c === '"' && t[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') q = false;
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (x) { return String(x).trim() !== ''; }); });
+  }
+  function toGuests(text) {
+    var rows = parseCsv(text);
+    if (rows.length < 2) return [];
+    var head = rows[0].map(function (h) { return String(h).trim().toLowerCase().replace(/[\s-]+/g, '_'); });
+    function col(names) { for (var i = 0; i < names.length; i++) { var k = head.indexOf(names[i]); if (k >= 0) return k; } return -1; }
+    var ix = {
+      first: col(['first_name', 'first', 'given_name']), last: col(['last_name', 'last', 'surname', 'family_name', 'last_initial']),
+      name: col(['name', 'full_name', 'guest', 'guest_name']),
+      last5: col(['mobile_last5', 'last5', 'last_5', 'mobile_last_5', 'last_5_digits']), mobile: col(['mobile', 'phone', 'mobile_number', 'phone_number']),
+      table: col(['table', 'table_number', 'table_no']), seat: col(['seat', 'seat_number', 'seat_no']),
+      partner: col(['plus_one_name', 'plus_one', 'partner', 'partner_name']), partnerSeat: col(['plus_one_seat', 'partner_seat'])
+    };
+    var per = Number(C.seatsPerTable) || 10;
+    function v(r, i) { return i >= 0 && r[i] != null ? String(r[i]).replace(/\s+/g, ' ').trim() : ''; }
+    return rows.slice(1).map(function (r, n) {
+      var first = v(r, ix.first), last = v(r, ix.last), full = v(r, ix.name);
+      if (!first && full) { var parts = full.split(' '); first = parts.shift() || ''; last = parts.join(' '); }
+      if (!full) full = (first + ' ' + last).trim();
+      var raw = (v(r, ix.last5) || v(r, ix.mobile)).replace(/\D/g, '');
+      var last5 = raw.length >= 5 ? raw.slice(-5) : (raw ? ('00000' + raw).slice(-5) : '');
+      var seat = parseInt(v(r, ix.seat), 10) || null;
+      var table = parseInt(v(r, ix.table).replace(/\D/g, ''), 10) || (seat ? Math.ceil(seat / per) : null);
+      return { id: n + 1, name: full, first: first, last: last, last5: last5, table: table, seat: seat, partner: v(r, ix.partner), partnerSeat: parseInt(v(r, ix.partnerSeat), 10) || null };
+    }).filter(function (g) { return g.name && g.table; });
+  }
+
+  /* ---------- name search ---------- */
+  var TITLES = { mr: 1, mrs: 1, ms: 1, miss: 1, dr: 1, pst: 1, pastor: 1, rev: 1, bishop: 1, elder: 1, deacon: 1, chief: 1, alhaji: 1, alhaja: 1, prof: 1, sir: 1, lady: 1, uncle: 1, aunty: 1, auntie: 1, mc: 1, dj: 1 };
+  function norm(s) {
+    s = String(s || '');
+    if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return s.toLowerCase();
+  }
+  function words(s) { return norm(s).split(/[^a-z0-9]+/).filter(Boolean); }
+  function indexGuests(list) {
+    var byTable = {};
+    list.forEach(function (g) {
+      var all = words(g.name);
+      g.core = all.filter(function (w) { return !TITLES[w]; });
+      if (!g.core.length) g.core = all;
+      g.titles = all.filter(function (w) { return TITLES[w]; });
+      g.flat = all.join('');
+      (byTable[g.table] = byTable[g.table] || []).push(g);
+    });
+    list.forEach(function (g) {
+      var mates = [];
+      byTable[g.table].forEach(function (o) { if (o !== g && norm(o.name) !== norm(g.name) && mates.length < 2) mates.push(o.name); });
+      g.mates = mates;
+    });
+  }
+  function findByName(q) {
+    var qs = words(q), flat = qs.join('');
+    if (flat.length < 2) return [];
+    var seen = {}, out = [];
+    guests.forEach(function (g) {
+      var rank = -1;
+      var allHit = qs.every(function (t) {
+        return g.core.some(function (w) { return w.indexOf(t) === 0; }) || g.titles.some(function (w) { return w.indexOf(t) === 0; });
+      });
+      if (allHit) {
+        if (g.core[0].indexOf(qs[0]) === 0) rank = 0;
+        else if (g.core.some(function (w) { return w.indexOf(qs[0]) === 0; })) rank = 1;
+        else rank = 2;
+      } else if (flat.length >= 3 && g.flat.indexOf(flat) >= 0) rank = 3;
+      if (rank < 0) return;
+      var key = norm(g.name) + '|' + g.table;
+      if (seen[key]) return;
+      seen[key] = 1;
+      out.push({ g: g, rank: rank });
+    });
+    out.sort(function (a, b) { return a.rank - b.rank || norm(a.g.name).localeCompare(norm(b.g.name)); });
+    return out.map(function (o) { return o.g; });
+  }
+  var nameInput = document.getElementById('name-input'), resultsEl = document.getElementById('results'),
+      nameNote = document.getElementById('name-note'), nameClear = document.getElementById('name-clear');
+  var MAX_SHOWN = 8;
+  function renderResults() {
+    var q = nameInput.value.trim();
+    nameClear.hidden = !nameInput.value;
+    resultsEl.innerHTML = '';
+    nameNote.textContent = '';
+    if (words(q).join('').length < 2) { if (q) nameNote.textContent = 'Keep typing: at least 2 letters.'; return; }
+    var found = findByName(q);
+    if (!found.length) {
+      nameNote.textContent = 'No name matches "' + q + '". Try your surname or fewer letters, or see an usher at the entrance.';
+      return;
+    }
+    found.slice(0, MAX_SHOWN).forEach(function (g) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'match compact';
+      var av = document.createElement('span'); av.className = 'avatar'; av.textContent = g.core.slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
+      var txt = document.createElement('span'); txt.className = 'txt';
+      var nm = document.createElement('b'); nm.textContent = g.name;
+      var sub = document.createElement('small'); sub.textContent = g.mates.length ? 'Seated with ' + g.mates.join(', ') : 'Tap to reveal your table';
+      txt.appendChild(nm); txt.appendChild(sub);
+      b.appendChild(av); b.appendChild(txt);
+      b.insertAdjacentHTML('beforeend', '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A9B6B1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>');
+      b.addEventListener('click', function () { nameInput.blur(); showGuest(g); });
+      resultsEl.appendChild(b);
+    });
+    if (found.length > MAX_SHOWN) nameNote.textContent = 'Showing ' + MAX_SHOWN + ' of ' + found.length + '. Keep typing to narrow it down.';
+  }
+  nameInput.addEventListener('input', renderResults);
+  nameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { var first = resultsEl.querySelector('.match'); if (first && resultsEl.children.length === 1) first.click(); else nameInput.blur(); }
+  });
+  var blurTimer;
+  nameInput.addEventListener('focus', function () { clearTimeout(blurTimer); state.typing = true; layout(); window.scrollTo(0, 0); });
+  nameInput.addEventListener('blur', function () { blurTimer = setTimeout(function () { state.typing = false; layout(); }, 300); });
+  nameClear.addEventListener('click', function () { nameInput.value = ''; renderResults(); nameInput.focus(); });
+  function loadGuests() {
+    var local = window.SEAT_FINDER_GUESTS_CSV || '';
+    var url = String(C.googleSheetCsvUrl || '').trim();
+    if (!url) return Promise.resolve(toGuests(local));
+    var bust = url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+    return fetch(bust, { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function (txt) { var g = toGuests(txt); if (!g.length) throw new Error('empty'); return g; })
+      .catch(function (e) {
+        console.warn('Seat Finder: Google Sheet could not be read, using guests.js instead.', e);
+        return toGuests(local);
+      });
+  }
+
+  /* ---------- search ---------- */
+  var boxesEl = document.getElementById('boxes');
+  function renderBoxes() {
+    boxesEl.innerHTML = '';
+    for (var i = 0; i < 5; i++) {
+      var d = document.createElement('div');
+      var ch = state.digits[i] || '';
+      d.className = 'box' + (ch ? ' filled' : '') + (i === state.digits.length ? ' active' : '');
+      d.textContent = ch;
+      boxesEl.appendChild(d);
+    }
+    document.getElementById('digits-live').textContent = state.digits ? state.digits.split('').join(' ') : '';
+  }
+  var keypad = document.getElementById('keypad');
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].forEach(function (k) {
+    if (!k) { keypad.appendChild(document.createElement('span')); return; }
+    var b = document.createElement('button');
+    b.type = 'button';
+    if (k === 'del') {
+      b.className = 'key plain';
+      b.setAttribute('aria-label', 'Delete last digit');
+      b.innerHTML = '<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 20 19H9l-6.5-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg>';
+      b.addEventListener('click', del);
+    } else {
+      b.className = 'key';
+      b.textContent = k;
+      b.addEventListener('click', function () { press(k); });
+    }
+    keypad.appendChild(b);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (state.screen !== 'search' || byName) return;
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') del();
+  });
+  var searchTimer;
+  function press(d) {
+    if (state.digits.length >= 5) return;
+    state.digits += d;
+    renderBoxes();
+    if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+    if (state.digits.length === 5) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(search, 320);
+    }
+  }
+  function del() { state.digits = state.digits.slice(0, -1); renderBoxes(); }
+  function search() {
+    var m = guests.filter(function (g) { return g.last5 && g.last5 === state.digits; });
+    state.matches = m;
+    if (!m.length) {
+      document.getElementById('nomatch-title').textContent = 'No match for ' + state.digits;
+      go('notfound');
+    } else if (m.length === 1) {
+      showGuest(m[0]);
+    } else {
+      renderChoose(m);
+      go('choose');
+    }
+  }
+  function initials(n) { return String(n || '').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase(); }
+  function renderChoose(m) {
+    document.getElementById('choose-lead').textContent = (m.length === 2 ? 'Two' : m.length) + ' guests have a mobile ending in ' + state.digits + '. Tap your name.';
+    var box = document.getElementById('matches');
+    box.innerHTML = '';
+    m.forEach(function (g) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'match';
+      var av = document.createElement('span'); av.className = 'avatar'; av.textContent = initials(g.first + ' ' + g.last);
+      var txt = document.createElement('span'); txt.className = 'txt';
+      var nm = document.createElement('b'); nm.textContent = g.first + (g.last ? ' ' + g.last[0] + '.' : '');
+      var sub = document.createElement('small'); sub.textContent = C.showPlusOne && g.partner ? 'With ' + g.partner.split(' ')[0] : 'Tap to reveal your table';
+      txt.appendChild(nm); txt.appendChild(sub);
+      b.appendChild(av); b.appendChild(txt);
+      b.insertAdjacentHTML('beforeend', '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A9B6B1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>');
+      b.addEventListener('click', function () { showGuest(g); });
+      box.appendChild(b);
+    });
+  }
+
+  /* ---------- found: dice roll, confetti, check-in ---------- */
+  var die = document.getElementById('die'), pipsEl = document.getElementById('pips'), numEl = document.getElementById('die-num');
+  for (var i = 0; i < 9; i++) { var p = document.createElement('span'); p.className = 'pip'; pipsEl.appendChild(p); }
+  var faces = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  function showFace(f) {
+    var on = faces[f] || [];
+    Array.prototype.forEach.call(pipsEl.children, function (p, i) { p.classList.toggle('on', on.indexOf(i) >= 0); });
+  }
+  var tablesEl = document.getElementById('tables'), tableEls = {};
+  function dot(n) { var s = document.createElement('span'); s.className = 't'; s.textContent = n; tableEls[n] = s; return s; }
+  function buildFloor() {
+    tablesEl.innerHTML = ''; tableEls = {};
+    var plan = Array.isArray(C.floorPlan) && C.floorPlan.length ? C.floorPlan : null;
+    var used = {};
+    guests.forEach(function (g) { used[g.table] = 1; });
+    if (plan) {
+      var cols = Math.max.apply(null, plan.map(function (r) { return r.length; }));
+      var wide = [];
+      plan.forEach(function (r) { r.forEach(function (c, i) { if (typeof c === 'string') wide[i] = 1; }); });
+      var tpl = [];
+      for (var i = 0; i < cols; i++) tpl.push(wide[i] ? '46px' : 'minmax(0, 1fr)');
+      tablesEl.className = 'tables floor';
+      tablesEl.style.gridTemplateColumns = tpl.join(' ');
+      plan.forEach(function (r) {
+        for (var i = 0; i < cols; i++) {
+          var c = r[i], el;
+          if (typeof c === 'number') el = dot(c);
+          else { el = document.createElement('span'); if (typeof c === 'string') { el.className = 'lbl'; el.textContent = c; } }
+          tablesEl.appendChild(el);
+        }
+      });
+    }
+    // Any table in the guest list that the plan leaves out still gets a dot
+    var missing = Object.keys(used).map(Number).filter(function (n) { return !tableEls[n]; }).sort(function (a, b) { return a - b; });
+    if (!plan) { tablesEl.className = 'tables'; tablesEl.style.gridTemplateColumns = ''; }
+    missing.forEach(function (n) { var el = dot(n); if (plan) el.style.gridColumn = 'auto'; tablesEl.appendChild(el); });
+  }
+
+  function storageKey(g) { return 'sf-checked-' + (C.shortTitle || '') + '-' + norm(g.name) + '-' + g.table; }
+  function isChecked(g) { try { return localStorage.getItem(storageKey(g)) === '1'; } catch (e) { return false; } }
+
+  function showGuest(g) {
+    state.guest = g;
+    var pill = document.getElementById('found-pill');
+    pill.textContent = byName ? '' : 'Mobile ending ' + g.last5;
+    pill.hidden = byName;
+    document.getElementById('guest-name').textContent = C.showPlusOne && g.partner ? g.first + ' & ' + g.partner.split(' ')[0] : g.name;
+    var seatChip = document.getElementById('seat-chip'), partnerChip = document.getElementById('partner-chip');
+    seatChip.hidden = true; partnerChip.hidden = true;
+    numEl.textContent = g.table;
+    var checked = isChecked(g);
+    document.getElementById('checkin-area').hidden = checked;
+    document.getElementById('checked').hidden = !checked;
+    go('found');
+    roll();
+  }
+
+  var rollRaf, rot = 0;
+  function stopRoll() { cancelAnimationFrame(rollRaf); state.rolling = false; }
+  function roll() {
+    var g = state.guest;
+    if (!g) return;
+    stopRoll();
+    Object.keys(tableEls).forEach(function (k) { tableEls[k].classList.remove('on'); });
+    document.getElementById('map-hint').textContent = 'Rolling…';
+    document.getElementById('seat-chip').hidden = true;
+    document.getElementById('partner-chip').hidden = true;
+    if (C.diceRoll === false || reduceMotion) { land(); return; }
+    state.rolling = true;
+    numEl.hidden = true; pipsEl.hidden = false;
+    die.classList.remove('settle');
+    die.setAttribute('aria-label', 'Rolling for your table');
+    document.getElementById('die-label').textContent = 'Rolling for your table';
+    var base = Math.round(rot / 360) * 360, spin = 1080, dur = 1900, t0 = performance.now(), next = 0, face = 1 + Math.floor(Math.random() * 6);
+    showFace(face);
+    function frame(now) {
+      var el = now - t0, prog = Math.min(1, el / dur), ease = 1 - Math.pow(1 - prog, 3);
+      rot = base + spin * ease;
+      var lift = -46 * Math.abs(Math.sin(prog * Math.PI * 3)) * (1 - prog);
+      var x = 28 * Math.sin(prog * Math.PI * 2.5) * (1 - prog);
+      die.style.transform = 'translate(' + x.toFixed(1) + 'px,' + lift.toFixed(1) + 'px) rotate(' + rot.toFixed(1) + 'deg) scale(.92)';
+      if (el >= next) {
+        next = el + 70 + prog * prog * 220;
+        var f = 1 + Math.floor(Math.random() * 6);
+        if (f === face) f = (f % 6) + 1;
+        face = f; showFace(face);
+      }
+      if (prog < 1) rollRaf = requestAnimationFrame(frame);
+      else { rot = base + spin; land(); }
+    }
+    rollRaf = requestAnimationFrame(frame);
+  }
+  function land() {
+    var g = state.guest;
+    state.rolling = false;
+    die.classList.add('settle');
+    die.style.transform = 'translate(0,0) rotate(' + rot + 'deg) scale(1)';
+    pipsEl.hidden = true; numEl.hidden = false;
+    die.setAttribute('aria-label', 'Table ' + g.table + '. Tap to roll again');
+    document.getElementById('die-label').textContent = 'Your table';
+    document.getElementById('map-hint').textContent = 'Table ' + g.table + ' glows';
+    if (tableEls[g.table]) tableEls[g.table].classList.add('on');
+    if (C.showSeat && g.seat) {
+      var sc = document.getElementById('seat-chip');
+      sc.textContent = 'Seat ' + g.seat + ' of ' + (C.totalSeats || '');
+      sc.hidden = false;
+    }
+    if (C.showPlusOne && g.partner) {
+      var pc = document.getElementById('partner-chip');
+      pc.textContent = 'With ' + g.partner + (C.showSeat && g.partnerSeat ? ', seat ' + g.partnerSeat : '');
+      pc.hidden = false;
+    }
+    if (navigator.vibrate) { try { navigator.vibrate([20, 40, 30]); } catch (e) {} }
+    if (!reduceMotion) confetti(die);
+  }
+  die.addEventListener('click', function () { if (!state.rolling) roll(); });
+
+  document.getElementById('btn-checkin').addEventListener('click', function () {
+    var g = state.guest;
+    if (!g) return;
+    try { localStorage.setItem(storageKey(g), '1'); } catch (e) {}
+    document.getElementById('checkin-area').hidden = true;
+    document.getElementById('checked').hidden = false;
+    var url = String(C.checkinUrl || '').trim();
+    if (url) {
+      fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ name: g.name, table: g.table, seat: g.seat || '', last5: g.last5 || '', event: C.shortTitle || C.occasion || '' })
+      }).catch(function () {});
+    }
+  });
+
+  /* ---------- confetti ---------- */
+  var cv = document.getElementById('confetti'), ctx = cv.getContext('2d'), parts = [], confRaf;
+  function sizeCanvas() { var r = window.devicePixelRatio || 1; cv.width = innerWidth * r; cv.height = innerHeight * r; ctx.setTransform(r, 0, 0, r, 0, 0); }
+  window.addEventListener('resize', sizeCanvas); sizeCanvas();
+  function confetti(fromEl) {
+    var b = fromEl.getBoundingClientRect(), cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+    var css = getComputedStyle(document.documentElement);
+    var cols = [css.getPropertyValue('--accent').trim() || '#C2DE7E', 'rgb(' + css.getPropertyValue('--accent2-rgb').trim() + ')', '#F1EEDA', '#EB8F41', '#E6C76A', '#FFFFFF'];
+    for (var i = 0; i < 90; i++) {
+      var ang = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.3, sp = 7 + Math.random() * 10;
+      parts.push({ x: cx + (Math.random() * 40 - 20), y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r: Math.random() * 6.28, vr: (Math.random() * 2 - 1) * .3,
+        w: 5 + Math.random() * 6, h: 8 + Math.random() * 8, round: Math.random() < .3, c: cols[i % cols.length], life: 150 });
+    }
+    cancelAnimationFrame(confRaf);
+    var last = performance.now();
+    (function tick(now) {
+      var k = Math.min(2.5, (now - last) / 16.7); last = now;
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      parts = parts.filter(function (p) { return p.life > 0 && p.y < innerHeight + 40; });
+      parts.forEach(function (p) {
+        p.x += p.vx * k; p.y += p.vy * k; p.vy += .32 * k; p.vx *= Math.pow(.985, k); p.r += p.vr * k; p.life -= k;
+        ctx.save(); ctx.globalAlpha = Math.min(1, p.life / 40); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+        if (p.round) { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, 6.283); ctx.fill(); } else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      if (parts.length) confRaf = requestAnimationFrame(tick); else ctx.clearRect(0, 0, innerWidth, innerHeight);
+    })(last);
+  }
+
+  /* ---------- start ---------- */
+  layout();
+  loadGuests().then(function (g) {
+    // Mobile search needs phone digits; fall back to name search if the list has none
+    if (!byName) {
+      var withDigits = g.filter(function (x) { return x.last5.length === 5; });
+      if (withDigits.length) g = withDigits; else byName = true;
+    }
+    guests = g;
+    indexGuests(guests);
+    buildFloor();
+    document.getElementById('by-name').hidden = !byName;
+    document.getElementById('by-mobile').hidden = byName;
+    document.getElementById('keypad').hidden = byName;
+    document.getElementById('hint-sub').textContent = byName ? "You'll type the first few letters of your name." : 'Have your mobile number handy.';
+    go(g.length ? 'welcome' : 'error');
+  });
+})();
+</script>
+</body>
+</html>

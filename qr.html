@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>QR sign · Find your seat</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="assets/qrcode.js"></script>
+<style>
+:root { --accent: #C2DE7E; --bg: #0C1211; --ink: #F2F4EC; --serif: 'Cormorant Garamond', Georgia, serif; --sans: Inter, -apple-system, system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #1B2220; color: var(--ink); font-family: var(--sans); }
+.tools { max-width: 720px; margin: 24px auto 0; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.tools label { flex: 1 1 320px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #C9D2CE; }
+.tools input { height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05); color: var(--ink); font: 14px var(--sans); }
+.tools button { height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--accent); color: #13200E; font: 600 14px var(--sans); cursor: pointer; }
+.note { max-width: 720px; margin: 10px auto 0; padding: 0 16px; font-size: 13px; color: #FFC48A; }
+.sign { width: 148mm; min-height: 210mm; margin: 24px auto 40px; background: var(--bg); border-radius: 6mm; padding: 14mm 12mm; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.portrait { width: 34mm; height: 34mm; border-radius: 50%; object-fit: cover; object-position: 50% 30%; border: 1.2mm solid var(--accent); box-shadow: 0 0 10mm rgba(194,222,126,.5); }
+.eyebrow { margin: 7mm 0 0; font-size: 10pt; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: #DCE3DE; }
+h1 { margin: 2mm 0 0; font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 30pt; line-height: 1; font-weight: 700; }
+.celeb { margin: 2mm 0 0; font-family: var(--serif); font-style: italic; font-size: 16pt; font-weight: 600; color: var(--accent); }
+.qr { margin-top: 8mm; background: #fff; border-radius: 4mm; padding: 4mm; width: 70mm; height: 70mm; display: grid; place-items: center; box-shadow: 0 0 12mm rgba(194,222,126,.45); }
+.qr svg { width: 100%; height: 100%; display: block; }
+.cta { margin: 7mm 0 0; font-family: var(--serif); font-size: 24pt; font-weight: 700; }
+.how { margin: 2mm 0 0; font-size: 11pt; color: #C9D2CE; }
+.url { margin: auto 0 0; padding-top: 6mm; font-size: 8.5pt; color: #9DAAA5; word-break: break-all; }
+@page { size: A5 portrait; margin: 0; }
+@media print {
+  body { background: var(--bg); }
+  .tools, .note { display: none; }
+  .sign { margin: 0; border-radius: 0; box-shadow: none; width: 148mm; height: 210mm; }
+}
+</style>
+</head>
+<body>
+<div class="tools">
+  <label for="url">Address the QR code opens
+    <input id="url" type="url" inputmode="url" autocomplete="off">
+  </label>
+  <button type="button" onclick="window.print()">Print sign</button>
+</div>
+<p class="note" id="note" hidden>This page is open from your computer, not your live site. Paste your GitHub Pages address above before printing.</p>
+
+<main class="sign">
+  <img class="portrait" id="portrait" alt="">
+  <p class="eyebrow">You're welcome</p>
+  <h1 id="occasion"></h1>
+  <p class="celeb" id="celeb"></p>
+  <div class="qr" id="qr" role="img" aria-label="QR code to find your seat"></div>
+  <p class="cta">Find your seat</p>
+  <p class="how">Point your phone camera at the code,<br><span id="how2">then type the first few letters of your name.</span></p>
+  <p class="url" id="url-text"></p>
+</main>
+
+<script>
+(function () {
+  var C = window.SEAT_FINDER_CONFIG || {};
+  if (C.accent) document.documentElement.style.setProperty('--accent', C.accent);
+  document.getElementById('occasion').textContent = C.occasion || '';
+  if (String(C.searchBy || 'name').toLowerCase() === 'mobile') document.getElementById('how2').textContent = 'then enter the last 5 digits of your mobile.';
+  document.getElementById('celeb').textContent = C.celebrant ? 'Celebrating ' + C.celebrant : '';
+  var img = document.getElementById('portrait');
+  img.src = C.portrait || 'assets/celebrant-portrait.jpg';
+  img.alt = C.celebrant || '';
+
+  var input = document.getElementById('url');
+  var here = location.href.split('#')[0].split('?')[0].replace(/qr\.html$/, '');
+  if (location.protocol === 'file:') { document.getElementById('note').hidden = false; here = 'https://your-username.github.io/seat-finder/'; }
+  input.value = here;
+
+  function draw() {
+    var url = input.value.trim();
+    var qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    document.getElementById('qr').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+    document.getElementById('url-text').textContent = url;
+  }
+  input.addEventListener('input', draw);
+  draw();
+})();
+</script>
+</body>
+</html>
