@@ -68,7 +68,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), .9); }
 h1, h2 { font-family: var(--serif); font-variant-numeric: lining-nums; font-weight: 600; margin: 0; text-shadow: 0 2px 20px rgba(0,0,0,.55); }
 #checkin-area { display: flex; flex-direction: column; align-items: center; }
-h1 { font-size: 40px; line-height: 1.02; margin-top: 10px; }
+h1 { font-size: 38px; line-height: 1.04; margin-top: 10px; }
 h2 { font-size: 40px; line-height: 1.02; }
 .celebrating { margin: 8px 0 0; font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 600; color: var(--accent); text-shadow: 0 0 16px rgba(var(--accent-rgb), .4), 0 1px 10px rgba(0,0,0,.6); }
 .lead { margin: 8px 0 0; font-size: 15px; line-height: 1.45; color: var(--soft); }
@@ -177,6 +177,13 @@ h2 { font-size: 40px; line-height: 1.02; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (max-height: 700px) {
+  #s-welcome h1 { font-size: 31px; }
+  #s-welcome .celebrating { font-size: 19px; margin-top: 4px; }
+  #s-welcome .card { margin-top: 12px; }
+  #s-welcome .row { padding: 8px 16px; }
+  #s-welcome .hint { margin: 4px 0 40px; }
+  #s-welcome .orb-wrap { width: 112px; height: 112px; margin-bottom: 14px; }
+  #s-welcome .orb, #s-welcome .orb-wrap .ring { width: 100px; height: 100px; }
   #s-found .orb-wrap { width: 104px; height: 104px; margin-bottom: 6px; }
   #s-found .orb, #s-found .orb-wrap .ring { width: 94px; height: 94px; }
   #s-found .die-stage { height: 120px; }
@@ -213,9 +220,9 @@ h2 { font-size: 40px; line-height: 1.02; }
 
   <!-- Welcome -->
   <section class="screen" id="s-welcome">
-    <p class="eyebrow"><span class="dot"></span>You're welcome</p>
-    <h1 data-bind="occasion"></h1>
-    <p class="celebrating">Celebrating <span data-bind="celebrant"></span></p>
+    <p class="eyebrow"><span class="dot"></span>Welcome to</p>
+    <h1 id="welcome-name"></h1>
+    <p class="celebrating" data-bind="occasion"></p>
     <div class="card">
       <div class="row">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
@@ -374,6 +381,9 @@ h2 { font-size: 40px; line-height: 1.02; }
   Object.keys(defaults).forEach(function (k) {
     document.querySelectorAll('[data-bind="' + k + '"]').forEach(function (el) { el.textContent = C[k] || ''; });
   });
+  function fullName(C) { return [C.celebrantTitle, C.celebrant].filter(function (x) { return x && String(x).trim(); }).join(' '); }
+  function possessive(n) { n = String(n || '').trim(); return n ? n + (/s$/i.test(n) ? '\u2019' : '\u2019s') : ''; }
+  document.getElementById('welcome-name').textContent = possessive(fullName(C));
   document.title = (C.shortTitle ? C.shortTitle + ' · ' : '') + 'Find your seat';
   (function credit() {
     var text = String(C.credit || '').trim(), mail = String(C.creditEmail || '').trim();
@@ -404,7 +414,7 @@ h2 { font-size: 40px; line-height: 1.02; }
   });
 
   /* ---------- layout: keep her face clear on any screen height ---------- */
-  var reserve = { loading: 300, error: 360, welcome: 520, search: 500, found: 570, choose: 380, notfound: 440 };
+  var reserve = { loading: 300, error: 360, welcome: 560, search: 500, found: 570, choose: 380, notfound: 440 };
   function layout() {
     var W = Math.min(window.innerWidth, 480);
     var H = (window.visualViewport && window.visualViewport.height) || window.innerHeight;

@@ -17,21 +17,23 @@ body { margin: 0; background: #1B2220; color: var(--ink); font-family: var(--san
 .tools input { height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05); color: var(--ink); font: 14px var(--sans); }
 .tools button { height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--accent); color: #13200E; font: 600 14px var(--sans); cursor: pointer; }
 .note { max-width: 720px; margin: 10px auto 0; padding: 0 16px; font-size: 13px; color: #FFC48A; }
-.sign { width: 148mm; min-height: 210mm; margin: 24px auto 40px; background: var(--bg); border-radius: 6mm; padding: 14mm 12mm; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.portrait { width: 34mm; height: 34mm; border-radius: 50%; object-fit: cover; object-position: 50% 30%; border: 1.2mm solid var(--accent); box-shadow: 0 0 10mm rgba(194,222,126,.5); }
-.eyebrow { margin: 7mm 0 0; font-size: 10pt; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: #DCE3DE; }
-h1 { margin: 2mm 0 0; font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 30pt; line-height: 1; font-weight: 700; }
+.sign { width: 148mm; min-height: 210mm; margin: 24px auto 40px; background: var(--bg); border-radius: 6mm; padding: 11mm 12mm 9mm; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.portrait { width: 28mm; height: 28mm; border-radius: 50%; object-fit: cover; object-position: 50% 30%; border: 1.2mm solid var(--accent); box-shadow: 0 0 10mm rgba(194,222,126,.5); }
+.eyebrow { margin: 5mm 0 0; font-size: 10pt; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: #DCE3DE; }
+h1 { margin: 2mm 0 0; font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 27pt; line-height: 1; font-weight: 700; }
 .celeb { margin: 2mm 0 0; font-family: var(--serif); font-style: italic; font-size: 16pt; font-weight: 600; color: var(--accent); }
-.qr { margin-top: 8mm; background: #fff; border-radius: 4mm; padding: 4mm; width: 70mm; height: 70mm; display: grid; place-items: center; box-shadow: 0 0 12mm rgba(194,222,126,.45); }
+.qr { margin-top: 6mm; background: #fff; border-radius: 4mm; padding: 4mm; width: 66mm; height: 66mm; display: grid; place-items: center; box-shadow: 0 0 12mm rgba(194,222,126,.45); }
 .qr svg { width: 100%; height: 100%; display: block; }
-.cta { margin: 7mm 0 0; font-family: var(--serif); font-size: 24pt; font-weight: 700; }
+.cta { margin: 5mm 0 0; font-family: var(--serif); font-size: 24pt; font-weight: 700; }
 .how { margin: 2mm 0 0; font-size: 11pt; color: #C9D2CE; }
-.url { margin: auto 0 0; padding-top: 6mm; font-size: 8.5pt; color: #9DAAA5; word-break: break-all; }
+.url { margin: auto 0 0; padding-top: 4mm; font-size: 8.5pt; color: #9DAAA5; word-break: break-all; }
+.credit { margin: 2.5mm 0 0; font-size: 8.5pt; color: #A9B6B1; }
+.credit a { color: #C9D2CE; text-decoration: none; }
 @page { size: A5 portrait; margin: 0; }
 @media print {
   body { background: var(--bg); }
   .tools, .note { display: none; }
-  .sign { margin: 0; border-radius: 0; box-shadow: none; width: 148mm; height: 210mm; }
+  .sign { margin: 0; border-radius: 0; box-shadow: none; width: 148mm; height: 210mm; overflow: hidden; }
 }
 </style>
 </head>
@@ -46,25 +48,37 @@ h1 { margin: 2mm 0 0; font-family: var(--serif); font-variant-numeric: lining-nu
 
 <main class="sign">
   <img class="portrait" id="portrait" alt="">
-  <p class="eyebrow">You're welcome</p>
+  <p class="eyebrow">Welcome to</p>
   <h1 id="occasion"></h1>
   <p class="celeb" id="celeb"></p>
   <div class="qr" id="qr" role="img" aria-label="QR code to find your seat"></div>
   <p class="cta">Find your seat</p>
   <p class="how">Point your phone camera at the code,<br><span id="how2">then type the first few letters of your name.</span></p>
   <p class="url" id="url-text"></p>
+  <p class="credit" id="credit" hidden><span id="credit-text"></span><span id="credit-sep"> · </span><a id="credit-mail"></a></p>
 </main>
 
 <script>
 (function () {
   var C = window.SEAT_FINDER_CONFIG || {};
   if (C.accent) document.documentElement.style.setProperty('--accent', C.accent);
-  document.getElementById('occasion').textContent = C.occasion || '';
+  function fullName(C) { return [C.celebrantTitle, C.celebrant].filter(function (x) { return x && String(x).trim(); }).join(' '); }
+  function possessive(n) { n = String(n || '').trim(); return n ? n + (/s$/i.test(n) ? '\u2019' : '\u2019s') : ''; }
+  document.getElementById('occasion').textContent = possessive(fullName(C));
   if (String(C.searchBy || 'name').toLowerCase() === 'mobile') document.getElementById('how2').textContent = 'then enter the last 5 digits of your mobile.';
-  document.getElementById('celeb').textContent = C.celebrant ? 'Celebrating ' + C.celebrant : '';
+  document.getElementById('celeb').textContent = C.occasion || '';
+  (function credit() {
+    var text = String(C.credit || '').trim(), mail = String(C.creditEmail || '').trim();
+    if (!text && !mail) return;
+    document.getElementById('credit-text').textContent = text;
+    var a = document.getElementById('credit-mail');
+    if (mail) { a.textContent = mail; a.href = 'mailto:' + mail; } else a.hidden = true;
+    document.getElementById('credit-sep').hidden = !(text && mail);
+    document.getElementById('credit').hidden = false;
+  })();
   var img = document.getElementById('portrait');
   img.src = C.portrait || 'assets/celebrant-portrait.jpg';
-  img.alt = C.celebrant || '';
+  img.alt = fullName(C);
 
   var input = document.getElementById('url');
   var here = location.href.split('#')[0].split('?')[0].replace(/qr\.html$/, '');

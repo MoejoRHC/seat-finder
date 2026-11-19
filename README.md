@@ -8,7 +8,7 @@ Guests scan a QR code, type the first few letters of their name, tap their name 
 |---|---|
 | `index.html` | The guest app. Don't edit unless you're comfortable with code. |
 | `config.js` | Event details, floor plan, colours and settings. Edit this for each event. |
-| `guests.js` | The guest list the app reads: 278 guests across 28 tables. |
+| `guests.js` | The guest list the app reads: 266 guests across 27 tables, plus 8 vendors at table 26. |
 | `guest-list.csv` | The same list as a spreadsheet file (name, table), for checking or for a Google Sheet. |
 | `qr.html` | Printable A5 sign with the QR code. |
 | `assets/` | The celebrant photos and the QR code library. |
@@ -22,7 +22,7 @@ Open `index.html` in Chrome, Safari or Edge, tap the glowing button and type:
 |---|---|
 | osas | Osas (table 6), Osasu Adediran (table 3), Pst Osas Micheals (table 27) |
 | bles | Five guests named Blessing, each with who they're seated with |
-| osifo | All eight Osifo guests across tables 8, 14 and 21 |
+| osifo | All seven Osifo guests across tables 8, 14 and 15 |
 | zzz | "No name matches" message |
 
 Tap a name to roll the die. Tap the die to roll again. "I've arrived" checks the guest in on that phone.

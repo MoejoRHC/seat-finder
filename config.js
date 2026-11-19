@@ -4,9 +4,11 @@
   Keep the quote marks around text values.
 */
 window.SEAT_FINDER_CONFIG = {
-  // Event details shown on the welcome screen
+  // Event details. The welcome screen reads:
+  //   "Welcome to [celebrantTitle] [celebrant]'s [occasion]"
+  celebrantTitle: 'Iye no\u2019gie',
   celebrant: 'Nekpen Edosomwan',
-  occasion: '70th Birthday Party',
+  occasion: 'Birthday Party',
   shortTitle: 'Nekpen at 70',
   date: 'Saturday 21 November 2026',
   time: 'From 5:00 pm',
@@ -33,7 +35,7 @@ window.SEAT_FINDER_CONFIG = {
   floorPlan: [
     [null, 23, 17, 15, 1, 'Stage', 2,  8, 14, 20, null],
     [29,   25, 19, 13, 3, 'Dance', 4, 10, 16, 22, 26],
-    [31,   27, 21, 11, 5, null,    6, 12, 18, 24, 28]
+    [31,   27, 21, 11, 5, null,    6, 12, 24, 18, 28]
   ],
 
   // Colours taken from the celebrant's outfit
@@ -50,7 +52,7 @@ window.SEAT_FINDER_CONFIG = {
   checkinUrl: '',
 
   // Only used when showSeat is true ("Seat 37 of 120")
-  totalSeats: 278,
+  totalSeats: 266,
 
   // Credit line at the bottom of every screen. Leave both blank to hide it.
   credit: 'Designed and Powered by Moejo',
