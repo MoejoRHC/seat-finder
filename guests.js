@@ -251,18 +251,18 @@ Czarseye,26
 Deola mocktail,26
 Dr Emma Udebunu,27
 Mrs Oluchi Udebunu,27
-Pst Osas Micheals,27
-Pst. Dr Micheals,27
+Ps Osas Michaels,27
+Dr Michaels Aibangbee,27
 Mr Daniel Obiokolo,27
-Mrs Blessing Obiokolo,27
+Mrs Blessing Obiokoli,27
 Mr Pius Nwosu,27
-Mrs Stalla Nwosu,27
+Mrs Stella Nwosu,27
 Mr Kelly Abrakasa,27
 Mrs Grace Abrakasa,27
 Henry Ariahu,28
 Chinwe Osuamadi,28
-Mr Christian Ekwerike,28
-Mrs Cristina,28
+Mr Christian Ewerike,28
+Ms Cristina,28
 Bright Evbuomwan,28
 Naomi Evbuomwan,28
 Mr Abu Koroma,28
