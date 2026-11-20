@@ -9,7 +9,7 @@ window.SEAT_FINDER_CONFIG = {
   celebrantTitle: 'Iye no\u2019gie',
   celebrant: 'Nekpen Edosomwan',
   occasion: 'Birthday Party',
-  shortTitle: 'Nekpen at 70',
+  shortTitle: 'Birthday Party',    // label at the top of the search screen
   date: 'Saturday 21 November 2026',
   time: 'From 5:00 pm',
   venue: 'Star Palace',
