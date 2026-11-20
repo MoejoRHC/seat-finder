@@ -139,8 +139,8 @@ Mrs Porsha Doherty,15
 Mr Kevin Osifo,15
 Mrs Ivie Osifo,15
 Stephanie Osifo,15
-Ngozi Iwunze,15
-Ngozi Iwunze plus 1,15
+Ben Egwuche,15
+Omon Benedicta Egwuche,15
 Owen Egbenoma,15
 Mr Adio,16
 Mrs Adio,16
@@ -198,9 +198,8 @@ Eliana Edeko,21
 Mrs Stella Brodricks,21
 Mr Brodricks,21
 Jed Brodricks,21
-Mr Ben Egweche,21
-Mrs Omon Benedicta Egwuche,21
-Omon mum,21
+Ngozi Iwunze,21
+Ngozi Iwunze plus one,21
 Mr George Momoh,21
 Mr Philip.Gideon,22
 Mrs Oghenero Umuwe,22
@@ -218,9 +217,10 @@ Eleni CBK,23
 Kelvin Onofomi,23
 Mr Grant Osawaru,23
 Mrs Micheline Osawaru,23
-Amuka,23
 Albert,23
 Esosa,23
+Elizabeth Sannoh,23
+Elizabeth plus one,23
 Mr Samuel Olawaleb,24
 Mrs Kofo Moore,24
 Ethan Samuel,24
@@ -251,12 +251,12 @@ Czarseye,26
 Deola mocktail,26
 Dr Emma Udebunu,27
 Mrs Oluchi Udebunu,27
-Pst Osas Micheals,27
-Pst. Dr Micheals,27
-Mr Daniel Obiokolo,27
-Mrs Blessing Obiokolo,27
+Ps Osas Michaels,27
+Dr Michaels,27
+Mr Daniel Obiokoli,27
+Mrs Blessing Obiokoli,27
 Mr Pius Nwosu,27
-Mrs Stalla Nwosu,27
+Mrs Stella Nwosu,27
 Mr Kelly Abrakasa,27
 Mrs Grace Abrakasa,27
 Henry Ariahu,28
@@ -284,4 +284,7 @@ Jumoke Omuvwie,31
 Sheriff Omuvwie,31
 Mr Ben Unaeze,31
 Mrs Kelechi Unaeze,31
+Ese,31
+Deborah,31
+Emma,31
 `;
